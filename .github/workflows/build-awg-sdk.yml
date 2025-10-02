@@ -1,0 +1,155 @@
+name: Build AWG2.0 IPKs
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+    branches: [ main ]
+
+concurrency:
+  group: awg-buildroot-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: "v${{ matrix.tag }} - ${{ matrix.build_env.pkgarch }} :: ${{ matrix.build_env.target }}/${{ matrix.build_env.subtarget }} build"
+    runs-on: Linux
+    strategy:
+      matrix:
+        tag: ['24.10.3']
+        build_env:
+          - pkgarch: aarch64_cortex-a53
+            target: mediatek
+            subtarget: filogic
+    permissions:
+      contents: write
+
+    env:
+      pkgarch: ${{ matrix.build_env.pkgarch}}
+      target: ${{ matrix.build_env.target}}
+      subtarget: ${{ matrix.build_env.subtarget}}
+
+    steps:
+      - name: Checkout workflow repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch all tags (safety)
+        run: git fetch --tags --force
+
+      - name: Create and push next tag
+        id: tagger
+        uses: mathieudutour/github-tag-action@v6.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tag_prefix: v
+          default_bump: patch
+          release_branches: main
+
+      - name: Export TAG (from tag push OR tagger)
+        run: |
+          if [[ "${{ startsWith(github.ref, 'refs/tags/') }}" == "true" ]]; then
+            echo "TAG=${GITHUB_REF_NAME}" >> $GITHUB_ENV
+          else
+            echo "TAG=${{ steps.tagger.outputs.new_tag }}" >> $GITHUB_ENV
+          fi
+
+      - name: Derive TAG for artifacts (if triggered by tag)
+        if: startsWith(github.ref, 'refs/tags/')
+        run: echo "TAG=${GITHUB_REF_NAME}" >> $GITHUB_ENV
+
+      - name: Checkout OpenWRT v${{ matrix.tag }}
+        uses: actions/checkout@v4
+        with:
+          repository: openwrt/openwrt
+          ref: v${{ matrix.tag }}
+          fetch-depth: 1
+          path: openwrt
+
+      - name: Export OWRT_DIR
+        run: echo "OWRT_DIR=$GITHUB_WORKSPACE/openwrt" >> $GITHUB_ENV
+
+      - name: Add private feed to feeds.conf
+        run: |
+          set -eux
+          cd "$OWRT_DIR"
+          cp feeds.conf.default feeds.conf || true
+          sed -i 's#git.openwrt.org/feed/packages.git.*#git.openwrt.org/feed/packages.git;openwrt-24.10#' feeds.conf || true
+          sed -i 's#project/luci.git.*#project/luci.git;openwrt-24.10#' feeds.conf || true
+          grep -q '^src-git routing '  feeds.conf || echo "src-git routing https://git.openwrt.org/feed/routing.git;openwrt-24.10" >> feeds.conf
+          grep -q '^src-git telephony ' feeds.conf || echo "src-git telephony https://git.openwrt.org/feed/telephony.git;openwrt-24.10" >> feeds.conf
+          echo "src-git awgopenwrt https://github.com/lolo6oT/awg-openwrt.git" >> feeds.conf
+
+      - name: Update & install feeds
+        working-directory: ${{ env.OWRT_DIR }}
+        run: |
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
+          ./scripts/feeds install -p awgopenwrt amneziawg-tools kmod-amneziawg luci-proto-amneziawg
+
+      - name: Configure target & packages
+        working-directory: ${{ env.OWRT_DIR }}
+        run: |
+          wget https://downloads.openwrt.org/releases/${{ matrix.tag }}/targets/${target}/${subtarget}/config.buildinfo -O .config
+          cat >> .config <<'EOF'
+          CONFIG_PACKAGE_amneziawg-tools=y
+          CONFIG_PACKAGE_kmod-amneziawg=m
+          CONFIG_PACKAGE_luci-proto-amneziawg=y
+          EOF
+          make defconfig
+
+      - name: Build host tools & toolchain
+        working-directory: ${{ env.OWRT_DIR }}
+        run: |
+          make tools/install -i -j $(nproc)
+          make toolchain/install -i -j $(nproc)
+
+      - name: Compile Kernel
+        working-directory: ${{ env.OWRT_DIR }}
+        run: |
+          make target/linux/compile -i -j $(nproc)
+
+      - name: Build packages
+        working-directory: ${{ env.OWRT_DIR }}
+        run: |
+          make package/feeds/awgopenwrt/amneziawg-tools/compile -i -j$(nproc)
+          make package/feeds/awgopenwrt/kmod-amneziawg/compile -i -j$(nproc)
+          make package/feeds/awgopenwrt/luci-proto-amneziawg/compile -i -j$(nproc)
+
+      - name: Prepare artifacts OpenWRT_v${{ matrix.tag }} ${{ matrix.build_env.target}}/${{ matrix.build_env.subtarget}}
+        run: |
+          tag_name="${TAG:-${{ github.ref_name }}}"
+          out="${GITHUB_WORKSPACE}/awgrelease"
+          mkdir -p "$out"
+          postfix="${tag_name}_v${{ matrix.tag }}_${{ matrix.build_env.pkgarch}}_${{ matrix.build_env.target}}_${{ matrix.build_env.subtarget}}"
+          cp ${OWRT_DIR}/bin/packages/${{ matrix.build_env.pkgarch }}/awgopenwrt/amneziawg-tools_*.ipk "$out/amneziawg-tools_${postfix}.ipk"
+          cp ${OWRT_DIR}/bin/packages/${{ matrix.build_env.pkgarch }}/awgopenwrt/luci-proto-amneziawg_*.ipk "$out/luci-proto-amneziawg_${postfix}.ipk"
+          cp ${OWRT_DIR}/bin/targets/${{ matrix.build_env.target}}/${{ matrix.build_env.subtarget}}/packages/kmod-amneziawg_*.ipk "$out/kmod-amneziawg_${postfix}.ipk"
+
+      - name: Compose release body
+        run: |
+          cat > BODY.md <<EOF
+          Ipk's awg2.0 for OpenWRT **v${{ matrix.tag }}**
+
+          **Target:** \`${{ matrix.build_env.target }}/${{ matrix.build_env.subtarget }}\`
+          **Arch:**   \`${{ matrix.build_env.pkgarch }}\`
+          **Tag:**    \`$TAG\`
+
+          Packages:
+          - amneziawg-tools
+          - kmod-amneziawg
+          - luci-proto-amneziawg
+          EOF
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ env.TAG }}
+          name: "AWG2.0 IPK's ${{ env.TAG }} (OpenWrt v${{ matrix.tag }} :: ${{ matrix.build_env.target }}/${{ matrix.build_env.subtarget }})"
+          body_path: BODY.md
+          files: awgrelease/*.ipk
+
+      - name: Cleanup
+        run: |
+          rm -rf awgrelease || true
