@@ -2,10 +2,7 @@ include $(TOPDIR)/rules.mk
 include $(INCLUDE_DIR)/kernel.mk
 
 PKG_NAME:=kmod-amneziawg
-<<<<<<< HEAD
-=======
 PKG_VERSION:=1.0.20251002
->>>>>>> origin/master
 PKG_RELEASE:=$(AUTORELEASE)
 
 PKG_SOURCE_PROTO:=git

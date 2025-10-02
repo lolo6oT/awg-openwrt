@@ -30,23 +30,11 @@ proto_amneziawg_init_config() {
 	proto_config_add_int "awg_h2"
 	proto_config_add_int "awg_h3"
 	proto_config_add_int "awg_h4"
-<<<<<<< HEAD
-        proto_config_add_string "awg_i1"
-        proto_config_add_string "awg_i2"
-        proto_config_add_string "awg_i3"
-        proto_config_add_string "awg_i4"
-        proto_config_add_string "awg_i5"
-        proto_config_add_string "awg_j1"
-        proto_config_add_string "awg_j2"
-        proto_config_add_string "awg_j3"
-        proto_config_add_string "awg_itime"
-=======
 	proto_config_add_string "awg_i1"
 	proto_config_add_string "awg_i2"
 	proto_config_add_string "awg_i3"
 	proto_config_add_string "awg_i4"
 	proto_config_add_string "awg_i5"
->>>>>>> origin/master
 	available=1
 	no_proto_task=1
 }
@@ -193,23 +181,11 @@ proto_amneziawg_setup() {
 	local awg_h2
 	local awg_h3
 	local awg_h4
-<<<<<<< HEAD
-        local awg_i1
-        local awg_i2
-        local awg_i3
-        local awg_i4
-        local awg_i5
-        local awg_j1
-        local awg_j2
-        local awg_j3
-        local awg_itime
-=======
 	local awg_i1
 	local awg_i2
 	local awg_i3
 	local awg_i4
 	local awg_i5
->>>>>>> origin/master
 
 
 	ensure_key_is_generated "${config}"
@@ -235,23 +211,11 @@ proto_amneziawg_setup() {
 	config_get awg_h2 "${config}" "awg_h2"
 	config_get awg_h3 "${config}" "awg_h3"
 	config_get awg_h4 "${config}" "awg_h4"
-<<<<<<< HEAD
-        config_get awg_h4 "${config}" "awg_i1"
-        config_get awg_h4 "${config}" "awg_i2"
-        config_get awg_h4 "${config}" "awg_i3"
-        config_get awg_h4 "${config}" "awg_i4"
-        config_get awg_h4 "${config}" "awg_i5"
-        config_get awg_h4 "${config}" "awg_j1"
-        config_get awg_h4 "${config}" "awg_j2"
-        config_get awg_h4 "${config}" "awg_j3"
-        config_get awg_h4 "${config}" "awg_itime"
-=======
 	config_get awg_i1 "${config}" "awg_i1"
 	config_get awg_i2 "${config}" "awg_i2"
 	config_get awg_i3 "${config}" "awg_i3"
 	config_get awg_i4 "${config}" "awg_i4"
 	config_get awg_i5 "${config}" "awg_i5"
->>>>>>> origin/master
 
 	if proto_amneziawg_is_kernel_mode; then
 		logger -t "amneziawg" "info: using kernel-space kmod-amneziawg for ${WG}"
@@ -313,35 +277,6 @@ proto_amneziawg_setup() {
 	if [ "${awg_h4}" ]; then
 		echo "H4 = ${awg_h4}" >> "${wg_cfg}"
 	fi
-<<<<<<< HEAD
-        if [ "${awg_i1}" ]; then
-                echo "I1 = ${awg_i1}" >> "${wg_cfg}"
-        fi
-        if [ "${awg_i2}" ]; then
-                echo "I2 = ${awg_i2}" >> "${wg_cfg}"
-        fi
-        if [ "${awg_i3}" ]; then
-                echo "I3 = ${awg_i3}" >> "${wg_cfg}"
-        fi
-        if [ "${awg_i4}" ]; then
-                echo "I4 = ${awg_i4}" >> "${wg_cfg}"
-        fi
-        if [ "${awg_i5}" ]; then
-                echo "I5 = ${awg_i5}" >> "${wg_cfg}"
-        fi
-        if [ "${awg_j1}" ]; then
-                echo "J1 = ${awg_j1}" >> "${wg_cfg}"
-        fi
-        if [ "${awg_j2}" ]; then
-                echo "J2 = ${awg_j2}" >> "${wg_cfg}"
-        fi
-        if [ "${awg_j3}" ]; then
-                echo "J3 = ${awg_j3}" >> "${wg_cfg}"
-        fi
-        if [ "${awg_itime}" ]; then
-                echo "Itime = ${awg_itime}" >> "${wg_cfg}"
-        fi
-=======
 	if [ "${awg_i1}" ]; then
 		echo "I1 = ${awg_i1}" >> "${wg_cfg}"
 	fi
@@ -357,7 +292,6 @@ proto_amneziawg_setup() {
 	if [ "${awg_i5}" ]; then
 		echo "I5 = ${awg_i5}" >> "${wg_cfg}"
 	fi
->>>>>>> origin/master
 
 	config_foreach proto_amneziawg_setup_peer "amneziawg_${config}"
 
