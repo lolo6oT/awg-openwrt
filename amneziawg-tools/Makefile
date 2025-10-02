@@ -9,12 +9,20 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=amneziawg-tools
+<<<<<<< HEAD
 PKG_VERSION:=1.0.20250706
+=======
+PKG_VERSION:=1.0.20250903
+>>>>>>> origin/master
 PKG_RELEASE:=$(AUTORELEASE)
 
 PKG_SOURCE:=v$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://github.com/amnezia-vpn/amneziawg-tools/archive/refs/tags/
+<<<<<<< HEAD
 PKG_HASH:=9a5aa77e95495f297ba535ec592e5a67dd211fe3d160df534e16b0d9caf441b1
+=======
+PKG_HASH:=d729a6f54aafcd55b2cbb7324f09ca8f0d2536772970652bf822a271d0c907d7
+>>>>>>> origin/master
 
 PKG_MAINTAINER:=Amnezia Admin <admin@amnezia.org>
 PKG_LICENSE:=GPL-2.0
@@ -37,9 +45,7 @@ define Package/amneziawg-tools
   DEPENDS:= \
 	  +!BUSYBOX_CONFIG_IP:ip \
 	  +!BUSYBOX_CONFIG_FEATURE_IP_LINK:ip \
-	  +kmod-amneziawg \
-	  +ip-full \
-	  +ip-tiny
+	  +ip-full
 endef
 
 define Package/amneziawg-tools/description

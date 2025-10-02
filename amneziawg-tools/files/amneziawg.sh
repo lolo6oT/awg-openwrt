@@ -24,10 +24,13 @@ proto_amneziawg_init_config() {
 	proto_config_add_int "awg_jmax"
 	proto_config_add_int "awg_s1"
 	proto_config_add_int "awg_s2"
+	proto_config_add_int "awg_s3"
+	proto_config_add_int "awg_s4"
 	proto_config_add_int "awg_h1"
 	proto_config_add_int "awg_h2"
 	proto_config_add_int "awg_h3"
 	proto_config_add_int "awg_h4"
+<<<<<<< HEAD
         proto_config_add_string "awg_i1"
         proto_config_add_string "awg_i2"
         proto_config_add_string "awg_i3"
@@ -37,6 +40,13 @@ proto_amneziawg_init_config() {
         proto_config_add_string "awg_j2"
         proto_config_add_string "awg_j3"
         proto_config_add_string "awg_itime"
+=======
+	proto_config_add_string "awg_i1"
+	proto_config_add_string "awg_i2"
+	proto_config_add_string "awg_i3"
+	proto_config_add_string "awg_i4"
+	proto_config_add_string "awg_i5"
+>>>>>>> origin/master
 	available=1
 	no_proto_task=1
 }
@@ -171,16 +181,19 @@ proto_amneziawg_setup() {
 	local nohostroute
 	local tunlink
 
-	# Amnezia WG specific parameters
+	# Amnezia WG 2.0 specific parameters
 	local awg_jc
 	local awg_jmin
 	local awg_jmax
 	local awg_s1
 	local awg_s2
+	local awg_s3
+	local awg_s4
 	local awg_h1
 	local awg_h2
 	local awg_h3
 	local awg_h4
+<<<<<<< HEAD
         local awg_i1
         local awg_i2
         local awg_i3
@@ -190,6 +203,13 @@ proto_amneziawg_setup() {
         local awg_j2
         local awg_j3
         local awg_itime
+=======
+	local awg_i1
+	local awg_i2
+	local awg_i3
+	local awg_i4
+	local awg_i5
+>>>>>>> origin/master
 
 
 	ensure_key_is_generated "${config}"
@@ -209,10 +229,13 @@ proto_amneziawg_setup() {
 	config_get awg_jmax "${config}" "awg_jmax"
 	config_get awg_s1 "${config}" "awg_s1"
 	config_get awg_s2 "${config}" "awg_s2"
+	config_get awg_s3 "${config}" "awg_s3"
+	config_get awg_s4 "${config}" "awg_s4"
 	config_get awg_h1 "${config}" "awg_h1"
 	config_get awg_h2 "${config}" "awg_h2"
 	config_get awg_h3 "${config}" "awg_h3"
 	config_get awg_h4 "${config}" "awg_h4"
+<<<<<<< HEAD
         config_get awg_h4 "${config}" "awg_i1"
         config_get awg_h4 "${config}" "awg_i2"
         config_get awg_h4 "${config}" "awg_i3"
@@ -222,6 +245,13 @@ proto_amneziawg_setup() {
         config_get awg_h4 "${config}" "awg_j2"
         config_get awg_h4 "${config}" "awg_j3"
         config_get awg_h4 "${config}" "awg_itime"
+=======
+	config_get awg_i1 "${config}" "awg_i1"
+	config_get awg_i2 "${config}" "awg_i2"
+	config_get awg_i3 "${config}" "awg_i3"
+	config_get awg_i4 "${config}" "awg_i4"
+	config_get awg_i5 "${config}" "awg_i5"
+>>>>>>> origin/master
 
 	if proto_amneziawg_is_kernel_mode; then
 		logger -t "amneziawg" "info: using kernel-space kmod-amneziawg for ${WG}"
@@ -249,7 +279,7 @@ proto_amneziawg_setup() {
 	if [ "${fwmark}" ]; then
 		echo "FwMark=${fwmark}" >> "${wg_cfg}"
 	fi
-	# AWG
+	# AWG 2.0
 	if [ "${awg_jc}" ]; then
 		echo "Jc = ${awg_jc}" >> "${wg_cfg}"
 	fi
@@ -265,6 +295,12 @@ proto_amneziawg_setup() {
 	if [ "${awg_s2}" ]; then
 		echo "S2 = ${awg_s2}" >> "${wg_cfg}"
 	fi
+	if [ "${awg_s3}" ]; then
+		echo "S3 = ${awg_s3}" >> "${wg_cfg}"
+	fi
+	if [ "${awg_s4}" ]; then
+		echo "S4 = ${awg_s4}" >> "${wg_cfg}"
+	fi
 	if [ "${awg_h1}" ]; then
 		echo "H1 = ${awg_h1}" >> "${wg_cfg}"
 	fi
@@ -277,6 +313,7 @@ proto_amneziawg_setup() {
 	if [ "${awg_h4}" ]; then
 		echo "H4 = ${awg_h4}" >> "${wg_cfg}"
 	fi
+<<<<<<< HEAD
         if [ "${awg_i1}" ]; then
                 echo "I1 = ${awg_i1}" >> "${wg_cfg}"
         fi
@@ -304,6 +341,23 @@ proto_amneziawg_setup() {
         if [ "${awg_itime}" ]; then
                 echo "Itime = ${awg_itime}" >> "${wg_cfg}"
         fi
+=======
+	if [ "${awg_i1}" ]; then
+		echo "I1 = ${awg_i1}" >> "${wg_cfg}"
+	fi
+	if [ "${awg_i2}" ]; then
+		echo "I2 = ${awg_i2}" >> "${wg_cfg}"
+	fi
+	if [ "${awg_i3}" ]; then
+		echo "I3 = ${awg_i3}" >> "${wg_cfg}"
+	fi
+	if [ "${awg_i4}" ]; then
+		echo "I4 = ${awg_i4}" >> "${wg_cfg}"
+	fi
+	if [ "${awg_i5}" ]; then
+		echo "I5 = ${awg_i5}" >> "${wg_cfg}"
+	fi
+>>>>>>> origin/master
 
 	config_foreach proto_amneziawg_setup_peer "amneziawg_${config}"
 
