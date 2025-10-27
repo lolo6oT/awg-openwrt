@@ -16,7 +16,7 @@ jobs:
     runs-on: Linux
     strategy:
       matrix:
-        tag: ['24.10.3']
+        tag: ['24.10.4']
         build_env:
           - pkgarch: aarch64_cortex-a53
             target: mediatek
